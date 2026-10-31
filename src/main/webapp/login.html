@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCity360 - Authentication</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-body">
+    <div class="login-card">
+        <h2>SmartCity360</h2>
+        <p>Urban Infrastructure & Governance Platform</p>
+
+        <div id="error-box" class="alert alert-danger" style="display: none;"></div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" class="form-control" required placeholder="Enter username" autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-control" required placeholder="Enter password" autocomplete="current-password">
+            </div>
+
+            <button type="submit" id="btn-login" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+                Sign In
+            </button>
+        </form>
+
+        <div class="login-accounts">
+            <div style="font-weight: 600; margin-bottom: 0.5rem;">Default Demo Accounts:</div>
+            <div>Admin: <strong>admin</strong> / Admin@123</div>
+            <div>Staff: <strong>staff</strong> / Staff@123</div>
+            <div>Resident: <strong>resident</strong> / Resident@123</div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errorBox = document.getElementById('error-box');
+            errorBox.style.display = 'none';
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.message || 'Login failed');
+                }
+
+                const data = await response.json();
+                sessionStorage.setItem('token', data.token);
+                sessionStorage.setItem('username', data.username);
+                sessionStorage.setItem('role', data.role);
+                sessionStorage.setItem('fullName', data.fullName);
+
+                window.location.href = 'index.html';
+            } catch (err) {
+                errorBox.textContent = err.message;
+                errorBox.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

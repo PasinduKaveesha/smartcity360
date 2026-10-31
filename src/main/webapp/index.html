@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCity360 - Central Operations Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <h1>SmartCity360</h1>
+            <span style="font-size: 0.8rem; color: #94a3b8; border-left: 1px solid #334155; padding-left: 0.75rem;">Urban Management</span>
+        </div>
+        <div class="user-badge">
+            <span id="current-user-name">User</span>
+            <span id="current-user-role" class="role-tag">ROLE</span>
+            <button id="btn-logout" class="btn btn-secondary btn-sm">Sign Out</button>
+        </div>
+    </header>
+
+    <nav class="tabs-container">
+        <button class="tab-btn active" data-tab="tab-energy">Energy (Decorator)</button>
+        <button class="tab-btn" data-tab="tab-zones">Zones (Composite)</button>
+        <button class="tab-btn" data-tab="tab-complaints">Complaints (Chain of Resp)</button>
+        <button class="tab-btn" data-tab="tab-streetlights">Streetlights (Flyweight)</button>
+        <button class="tab-btn" data-tab="tab-policies">Policies (Interpreter)</button>
+        <button class="tab-btn" data-tab="tab-sensors">Sensors</button>
+        <button class="tab-btn" data-tab="tab-waste">Waste</button>
+        <button class="tab-btn" data-tab="tab-residents">Residents & Staff</button>
+    </nav>
+
+    <main>
+        <!-- 1. ENERGY TAB -->
+        <section id="tab-energy" class="tab-content active">
+            <div class="grid">
+                <div class="card">
+                    <h2 class="card-title">Stream Decorator Pipeline</h2>
+                    <div class="form-group">
+                        <label>Active Transformation Layers</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="layer-encryption" checked> AES/GCM Encryption
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="layer-authentication" checked> HMAC-SHA256 Auth
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="layer-compression" checked> GZIP Compression
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="energy-meter-select">Target Energy Meter</label>
+                        <select id="energy-meter-select" class="form-control">
+                            <option value="">-- Choose Meter --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="energy-reading-input">Meter Reading (kWh)</label>
+                        <input type="number" step="0.01" id="energy-reading-input" class="form-control" value="185.75">
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button type="button" id="btn-energy-preview" class="btn btn-secondary">Preview Pipeline</button>
+                        <button type="button" id="btn-energy-send" class="btn btn-primary">Transmit & Save</button>
+                    </div>
+
+                    <div id="energy-preview-result" class="card" style="margin-top: 1rem; display: none; background: #151d35;"></div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Installed Building Energy Meters</h2>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Zone</th>
+                                    <th>Active Layers</th>
+                                    <th>Installed</th>
+                                </tr>
+                            </thead>
+                            <tbody id="energy-meters-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Meter Telemetry Transmission History</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Reading</th>
+                                <th>Raw Size</th>
+                                <th>Secured Size</th>
+                                <th>Applied Layers</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="energy-readings-table-body">
+                            <tr><td colspan="6" style="text-align: center; color: #94a3b8;">Select a meter to load transmission logs</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. ZONES TAB -->
+        <section id="tab-zones" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span>Smart City Zone Hierarchy (Composite Tree)</span>
+                    <button class="btn btn-secondary btn-sm" onclick="loadZoneTree()">Refresh Tree</button>
+                </div>
+                <div id="zone-tree-container" style="padding: 0.5rem 0;"></div>
+            </div>
+
+            <div id="zone-report-modal" class="card" style="display: none; margin-top: 1.5rem; background: #151d35;">
+                <div class="card-title">
+                    <span>Hierarchical Subtree Energy Report</span>
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('zone-report-modal').style.display='none'">Close</button>
+                </div>
+                <pre id="zone-report-content" style="background: #0b132b; padding: 1rem; border-radius: 6px; overflow-x: auto; color: #93c5fd; font-family: monospace;"></pre>
+            </div>
+        </section>
+
+        <!-- 3. COMPLAINTS TAB -->
+        <section id="tab-complaints" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2 class="card-title">Submit Citizen Grievance</h2>
+                    <form id="complaint-form">
+                        <div class="form-group">
+                            <label for="complaint-resident-id">Resident ID</label>
+                            <input type="number" id="complaint-resident-id" class="form-control" required value="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="complaint-title">Subject / Title</label>
+                            <input type="text" id="complaint-title" class="form-control" required placeholder="e.g. Broken streetlight on Main St">
+                        </div>
+                        <div class="form-group">
+                            <label for="complaint-severity">Severity Rating</label>
+                            <select id="complaint-severity" class="form-control">
+                                <option value="LOW">LOW (Rank 1 - Handled by Local Staff)</option>
+                                <option value="MEDIUM">MEDIUM (Rank 2 - Escalated to Supervisor)</option>
+                                <option value="HIGH">HIGH (Rank 3 - Escalated to Supervisor)</option>
+                                <option value="CRITICAL">CRITICAL (Rank 4 - Escalated to City Manager)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="complaint-description">Description</label>
+                            <textarea id="complaint-description" class="form-control" required placeholder="Provide details..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">File Complaint</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Escalation Chain Configuration</h2>
+                    <div style="margin-bottom: 1rem;">
+                        <span style="font-size: 0.8rem; color: #94a3b8;">Active Routing Sequence:</span>
+                        <div id="chain-order-display" style="margin-top: 0.5rem; font-size: 0.9rem;"></div>
+                    </div>
+                    <div class="admin-only" style="display: flex; gap: 0.5rem;">
+                        <button id="btn-reorder-default" class="btn btn-secondary btn-sm">Default Sequence</button>
+                        <button id="btn-reorder-reverse" class="btn btn-warning btn-sm">Invert Sequence</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Citizen Complaints Registry</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Resident</th>
+                                <th>Severity</th>
+                                <th>Status</th>
+                                <th>Resolved By</th>
+                                <th>Filed At</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="complaints-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="complaint-trace-modal" class="card" style="display: none; margin-top: 1.5rem; background: #151d35;">
+                <div class="card-title">
+                    <span id="trace-complaint-title">Escalation Trace Timeline</span>
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('complaint-trace-modal').style.display='none'">Close</button>
+                </div>
+                <div id="trace-timeline" class="timeline"></div>
+            </div>
+        </section>
+
+        <!-- 4. STREETLIGHTS TAB -->
+        <section id="tab-streetlights" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2 class="card-title">Flyweight Memory Conservation Stats</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">Total Fixtures</span>
+                            <div id="stat-total-lights" style="font-size: 1.5rem; font-weight: 700; color: #60a5fa;">-</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">Shared Models</span>
+                            <div id="stat-unique-models" style="font-size: 1.5rem; font-weight: 700; color: #34d399;">-</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">Flyweight RAM</span>
+                            <div id="stat-shared-memory" style="font-size: 1.25rem; font-weight: 600; color: #93c5fd;">-</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">Unshared RAM</span>
+                            <div id="stat-unshared-memory" style="font-size: 1.25rem; font-weight: 600; color: #f87171;">-</div>
+                        </div>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.8rem; color: #94a3b8;">Estimated Heap Savings:</span>
+                        <span id="stat-savings-percent" class="badge badge-success" style="font-size: 1rem; margin-left: 0.5rem;">-%</span>
+                    </div>
+                    <div class="admin-only" style="margin-top: 1.25rem;">
+                        <button id="btn-bulk-streetlights" class="btn btn-primary" style="width: 100%;">
+                            Bulk Generate Fixtures (JDBC Batch)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card" style="grid-column: span 2;">
+                    <div class="card-title">
+                        <span>Streetlight Fixtures</span>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <button id="btn-prev-streetlights" class="btn btn-secondary btn-sm">&larr; Prev</button>
+                            <span id="streetlights-page-indicator" style="font-size: 0.8rem; color: #94a3b8;">Page 1</span>
+                            <button id="btn-next-streetlights" class="btn btn-secondary btn-sm">Next &rarr;</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Model & Specs</th>
+                                    <th>Zone</th>
+                                    <th>State</th>
+                                    <th>Brightness</th>
+                                    <th>Control</th>
+                                </tr>
+                            </thead>
+                            <tbody id="streetlights-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. POLICIES TAB -->
+        <section id="tab-policies" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2 class="card-title">Policy Rule Editor (Grammar Interpreter)</h2>
+                    <div id="policy-validation-box" class="alert" style="display: none;"></div>
+                    <form id="policy-form">
+                        <input type="hidden" id="policy-id">
+                        <div class="form-group">
+                            <label for="policy-name">Policy Identifier</label>
+                            <input type="text" id="policy-name" class="form-control" required placeholder="e.g. noise_after_hours">
+                        </div>
+                        <div class="form-group">
+                            <label for="policy-rule">Rule Expression Grammar</label>
+                            <textarea id="policy-rule" class="form-control" required placeholder="e.g. noise_level > 70 AND time_between(22:00, 06:00)"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="policy-action">Triggered Action Directive</label>
+                            <input type="text" id="policy-action" class="form-control" required placeholder="e.g. ALERT noise limit exceeded">
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="policy-enabled" checked> Enable Policy
+                            </label>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="button" id="btn-validate-policy" class="btn btn-secondary">Validate Syntax</button>
+                            <button type="submit" class="btn btn-primary admin-only">Save Policy</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span>Configured Policies</span>
+                        <button id="btn-evaluate-all" class="btn btn-warning btn-sm">Evaluate All Now</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Rule Expression</th>
+                                    <th>Action</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="policies-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Policy Evaluation Execution Logs</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Policy</th>
+                                <th>Outcome</th>
+                                <th>Action Taken</th>
+                                <th>Telemetry Context Snapshot</th>
+                                <th>Evaluated At</th>
+                            </tr>
+                        </thead>
+                        <tbody id="policy-logs-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. SENSORS TAB -->
+        <section id="tab-sensors" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">IoT Telemetry Sensors</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Type</th>
+                                <th>Zone</th>
+                                <th>Latest Value</th>
+                                <th>Status</th>
+                                <th>Push Telemetry Reading</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sensors-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. WASTE TAB -->
+        <section id="tab-waste" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">Municipal Smart Waste Bins</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Zone</th>
+                                <th>Location</th>
+                                <th>Capacity</th>
+                                <th>Fill Level</th>
+                                <th>Last Collection</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="waste-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. RESIDENTS & STAFF TAB -->
+        <section id="tab-residents" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <h2 class="card-title">Register New Resident</h2>
+                    <form id="resident-form">
+                        <div class="form-group">
+                            <label for="resident-name">Full Name</label>
+                            <input type="text" id="resident-name" class="form-control" required placeholder="Resident name">
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-email">Email Address</label>
+                            <input type="email" id="resident-email" class="form-control" required placeholder="resident@smartcity.lk">
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-address">Residential Address</label>
+                            <input type="text" id="resident-address" class="form-control" required placeholder="Apt / Street">
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-zone-id">Zone ID</label>
+                            <input type="number" id="resident-zone-id" class="form-control" value="8">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Register Resident</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Municipal Staff Directory</h2>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Officer Name</th>
+                                    <th>Staff Role</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staff-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Registered City Residents</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Zone</th>
+                            </tr>
+                        </thead>
+                        <tbody id="residents-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/energy.js"></script>
+    <script src="js/zones.js"></script>
+    <script src="js/complaints.js"></script>
+    <script src="js/streetlights.js"></script>
+    <script src="js/policies.js"></script>
+    <script src="js/sensors.js"></script>
+    <script src="js/waste.js"></script>
+    <script src="js/residents.js"></script>
+
+    <script>
+        // Tab switching and dynamic data refresh controller
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                btn.classList.add('active');
+                const targetId = btn.getAttribute('data-tab');
+                const targetContent = document.getElementById(targetId);
+                if (targetContent) targetContent.classList.add('active');
+
+                // Trigger tab-specific data load
+                switch (targetId) {
+                    case 'tab-energy': loadEnergyMeters(); break;
+                    case 'tab-zones': loadZoneTree(); break;
+                    case 'tab-complaints': loadComplaints(); loadEscalationChain(); break;
+                    case 'tab-streetlights': loadStreetlights(1); loadStreetlightStats(); break;
+                    case 'tab-policies': loadPolicies(); loadPolicyLogs(); break;
+                    case 'tab-sensors': loadSensors(); break;
+                    case 'tab-waste': loadWasteBins(); break;
+                    case 'tab-residents': loadResidents(); loadStaff(); break;
+                }
+            });
+        });
+
+        // Initialize default tab on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadEnergyMeters();
+        });
+    </script>
+</body>
+</html>
